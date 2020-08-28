@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "422555263322",
+    "firebase_url": "https://ferreteriacontrol-708b4.firebaseio.com",
+    "project_id": "ferreteriacontrol-708b4",
+    "storage_bucket": "ferreteriacontrol-708b4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422555263322:android:4f0e8d41d0ef36e1291363",
+        "android_client_info": {
+          "package_name": "com.example.ferreteriacontrol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "422555263322-a5cjjqlsd2stbgbdsohljnvgaq61cmip.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCH6jWnxibIbeoVbJmfVCUugscJurq4R4U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "422555263322-a5cjjqlsd2stbgbdsohljnvgaq61cmip.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

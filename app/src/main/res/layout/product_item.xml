@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    app:cardBackgroundColor="#F6F6F6">
+
+    <RelativeLayout
+        android:id="@+id/cardviewLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="15dp"
+        android:gravity="center">
+        <!--Image = description-->
+        <ImageView
+            android:id="@+id/productImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:layout_marginRight="10dp" />
+
+        <TextView
+            android:id="@+id/productName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@id/productBsf"
+            android:layout_toEndOf="@id/productImage"
+            android:ellipsize="end"
+            android:fontFamily="monospace"
+            android:maxLines="2"
+            android:paddingTop="3dp"
+            android:text="Title"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textFontWeight="900"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/productBsf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:fontFamily="monospace"
+            android:layout_marginLeft="10dp"
+            android:text="BsS"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="#02c402"
+            android:textFontWeight="900"
+            android:textSize="18sp" />
+
+        <!--Price = description-->
+        <TextView
+            android:id="@+id/productBrand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/productName"
+            android:layout_marginBottom="20dp"
+            android:layout_toEndOf="@id/productImage"
+            android:fontFamily="monospace"
+            android:text="Brand" />
+
+        <!--Price = description-->
+        <TextView
+            android:id="@+id/productPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/productBrand"
+            android:layout_toEndOf="@id/productImage"
+            android:fontFamily="monospace"
+            android:text="Description" />
+        <!--Amount = priority -->
+        <TextView
+            android:id="@+id/productAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/productPrice"
+            android:layout_toEndOf="@id/productImage"
+            android:fontFamily="monospace"
+            android:text="Priority" />
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>
