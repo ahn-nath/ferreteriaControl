@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FirebaseAuth mAuth;
     private FirebaseFirestore mStore;
     private DocumentReference usersRef;
-    private String userRole;
+    private int userRole;
     int[] rubrosId = new int[10];
     TextView scr1;
     TableLayout t1;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     LinearLayout l1;
     ImageView img1;
     String userId;
+    int hello;
     private boolean authorizeUser;
 
 
@@ -52,7 +54,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAuth = FirebaseAuth.getInstance();
         mStore = FirebaseFirestore.getInstance();
         userId = mAuth.getCurrentUser().getUid();
-        usersRef = mStore.document("usuarios/" + userId); //get reference to the current user's document
+        usersRef = mStore.document("usuarios/" + userId);//get reference to the current user's document
+
+
+        //get data
+        SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
+        authorizeUser = sharedPreferences.getBoolean("isAdmin", false);
+        hello = sharedPreferences.getInt("role", 0);
 
         String[] rubros = {
                 "Cerrajería",
@@ -68,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         };
 
         int[] images = new int[]{R.drawable.cat3, R.drawable.cat3};
-        authorizeUser = getUserRole();
         goView(rubros, images);
 
     }
@@ -76,12 +83,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //add admin icon to top bar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(authorizeUser) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.main_menu, menu);
-            return true;
-        }
-          return  false; //check if it works
+          return  true;
 
     }
 
@@ -91,7 +95,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.settings:
                 //intent
                 Intent intent = new Intent(getApplicationContext(), AdminControl.class);
-                intent.putExtra("userRole", userRole);
                 startActivity(intent);
                 return true;
             default:
@@ -99,37 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    //get role of current user
-    private boolean getUserRole () {
-        final boolean[] test = {false};
-        usersRef.get()
-                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        if (documentSnapshot.exists()) {
-                            //restrict user access based on its role
-                            String role = documentSnapshot.getString("rol");
-                            userRole = role;
-                            Toast.makeText(MainActivity.this, "Tu role es de nivel " + role, Toast.LENGTH_SHORT).show();
-                            if(role == "1"){
-                              test[0] = true;
-                            }
-                        } else {
-                            Toast.makeText(MainActivity.this, "El usuario no existe", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                    //handle exception properly
-                        // 1- wrong password or inexistent
-                    }
-                });
 
-        return test[0];
-
-    }
 
     //set table with product categories
     public void goView(String[] rubros, int[] images) {
@@ -204,12 +177,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(this, "hello " + id + " " + rubrosId[i], Toast.LENGTH_SHORT).show();
                 position = i + 1;
                 break;
-                //this is a comment
             }
 
         }
         //send product category identifier to Product activity
-        Intent intent = new Intent(getApplicationContext(), Products.class);
+        Intent intent = new Intent(getApplicationContext(), AdminControl.class);
         intent.putExtra("rubro", position);
         intent.putExtra("userRole", userRole);
         startActivity(intent);

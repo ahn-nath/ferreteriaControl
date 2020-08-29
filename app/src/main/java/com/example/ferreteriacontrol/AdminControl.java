@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,6 +38,9 @@ public class AdminControl extends AppCompatActivity {
     private CollectionReference productRef = mStore.collection("Productos");
     private DocumentReference docRef;
     private ProductAdapter adapter;
+    private Query queryReference;
+    int hello;
+    private boolean authorizeUser;
     EditText searchText;
     FloatingActionButton buttonAddProduct;
     private Handler mainHandler = new Handler();
@@ -46,18 +50,37 @@ public class AdminControl extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_products);
         searchText = findViewById(R.id.searchText);
-        //Make add product button visible for this activity
         buttonAddProduct = findViewById(R.id.button_add_product);
-        buttonAddProduct.setVisibility(View.VISIBLE);
-        buttonAddProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(AdminControl.this, SingleProductAdmin.class));
-            }
-        });
+
+        //test theory - TEST 1 SHARED PREFERENCES
+        SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
+        authorizeUser = sharedPreferences.getBoolean("isAdmin", false);
+        hello = sharedPreferences.getInt("role", 0);
+
+        if(authorizeUser){
+            //Make add product button visible for this activity
+            buttonAddProduct.setVisibility(View.VISIBLE);
+            buttonAddProduct.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(AdminControl.this, SingleProductAdmin.class));
+                }
+            });
+        }
+
+        Toast.makeText(getApplicationContext(), "data" + hello + authorizeUser, Toast.LENGTH_LONG).show();
 
 
-        setUpProductsView(productRef);
+        //get extra intent/ determine product's filter
+        Intent intent = getIntent();
+        int rubro = intent.getIntExtra("rubro", -1);
+        if(rubro == -1) {
+            queryReference = productRef;
+        } else {
+            queryReference = productRef.whereEqualTo("group", rubro);;
+        }
+
+        setUpProductsView(queryReference);
 
         //Search view
         searchText.addTextChangedListener(new TextWatcher() {
@@ -106,7 +129,6 @@ public class AdminControl extends AppCompatActivity {
 
     private void setUpProductsView(Query query) {
         //set view
-
         FirestoreRecyclerOptions<Product> options = new FirestoreRecyclerOptions.Builder<Product>()
                 .setQuery(query, Product.class)
                 .build();
@@ -118,35 +140,36 @@ public class AdminControl extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();//change data again
 
-        //delete single item with swipe action
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
-                ItemTouchHelper.RIGHT) {
-            //direction to delete
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
+        if(authorizeUser) {
+            //delete single item with swipe action
+            new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
+                    ItemTouchHelper.RIGHT) {
+                //direction to delete
+                @Override
+                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                    return false;
+                }
 
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                @Override
+                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
-                adapter.deleteItem(viewHolder.getAdapterPosition());
-            }
+                    adapter.deleteItem(viewHolder.getAdapterPosition());
+                }
 
-            //on Swipe change color
-            @Override
-            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                        .addBackgroundColor(0xFF000000)
-                        .addActionIcon(R.drawable.ic_delete)
-                        .create()
-                        .decorate();
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                //on Swipe change color
+                @Override
+                public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                    new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                            .addBackgroundColor(0xFF000000)
+                            .addActionIcon(R.drawable.ic_delete)
+                            .create()
+                            .decorate();
+                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 
 
-            }
-        }).attachToRecyclerView(recyclerView);
-
+                }
+            }).attachToRecyclerView(recyclerView);
+        }
 
         adapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener() {
             @Override
@@ -156,18 +179,19 @@ public class AdminControl extends AppCompatActivity {
                 String path = documentSnapshot.getReference().getPath();
 
 
-                switch (caseView) {
-                    case 1:
-                        //UPDATE PRODUCT
-                        //send document reference to update method in another activity
-                        Toast.makeText(AdminControl.this,
-                                "Position: " + position + " ID: " + id + " " + caseView, Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(getApplicationContext(), SingleProductAdmin.class);
-                        intent.putExtra("path", path);
-                        startActivity(intent);
-                        break;
 
-                    case 2:
+                  if((authorizeUser) && caseView == 1) {
+                          //UPDATE PRODUCT
+                          //send document reference to update method in another activity
+                          Toast.makeText(AdminControl.this,
+                                  "Position: " + position + " ID: " + id + " " + caseView, Toast.LENGTH_SHORT).show();
+                          Intent intent = new Intent(getApplicationContext(), SingleProductAdmin.class);
+                          intent.putExtra("path", path);
+                          startActivity(intent);
+
+                  }
+
+                  if(caseView == 2){
                         //Show price in dollars
                         docRef = mStore.document(path); //get document data
                         docRef.get()
@@ -221,11 +245,7 @@ public class AdminControl extends AppCompatActivity {
                                         }
                                     }
                                 });
-
-                        break;
-                    default:
-                        Toast.makeText(AdminControl.this, "Error", Toast.LENGTH_SHORT).show();
-                }
+                  }
 
             }
 
