@@ -76,6 +76,8 @@ public class SignIn extends AppCompatActivity {
                 if (task.isSuccessful()) {
 
                     Toast.makeText(SignIn.this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
+
+                    //Store user's role
                     userId = mAuth.getCurrentUser().getUid();
                     usersRef = mStore.document("usuarios/" + userId);//get reference to the current user's document
                     usersRef.get()
@@ -83,10 +85,9 @@ public class SignIn extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                                     if (documentSnapshot.exists()) {
-                                        //restrict user access based on its role
                                         int role =  Integer.parseInt(documentSnapshot.get("rol").toString());
                                         boolean isAdmin = (role == 1);
-                                        //save preferences
+                                        //save role and boolean value to SharedPreferences
                                         SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
                                         SharedPreferences.Editor editor = sharedPreferences.edit();
                                         editor.putInt("role", role);
@@ -95,27 +96,18 @@ public class SignIn extends AppCompatActivity {
 
                                     }    }
                             });
-                    //pass role as an intent the first time
+                   //go to Main activity
                     startActivity(new Intent(getApplicationContext(), SignIn.class));
-
                 }
-
 
                 else {
-                    Toast.makeText(SignIn.this, "Hubo un error al ingresar a su cuenta " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignIn.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     //progressBar.setVisibility(View.GONE);
                 }
-
-
-
             }
 
 
         });
-
-
-
-
     }
 
     public void goRegister(View view) {

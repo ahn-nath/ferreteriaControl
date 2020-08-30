@@ -16,7 +16,6 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -27,7 +26,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.io.IOException;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -52,7 +50,7 @@ public class AdminControl extends AppCompatActivity {
         searchText = findViewById(R.id.searchText);
         buttonAddProduct = findViewById(R.id.button_add_product);
 
-        //test theory - TEST 1 SHARED PREFERENCES
+        //get user's role and position
         SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
         authorizeUser = sharedPreferences.getBoolean("isAdmin", false);
         hello = sharedPreferences.getInt("role", 0);
@@ -71,7 +69,7 @@ public class AdminControl extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "data" + hello + authorizeUser, Toast.LENGTH_LONG).show();
 
 
-        //get extra intent/ determine product's filter
+        //get extra intent to determine product's filter
         Intent intent = getIntent();
         int rubro = intent.getIntExtra("rubro", -1);
         if(rubro == -1) {
@@ -81,7 +79,13 @@ public class AdminControl extends AppCompatActivity {
         }
 
         setUpProductsView(queryReference);
+        searchView();
 
+        
+
+    }
+
+    private void searchView() {
         //Search view
         searchText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -98,7 +102,7 @@ public class AdminControl extends AppCompatActivity {
 
                 if (s.toString() != null) {
 
-                    //create query
+                    //create query with inputted value
                     Query searchQuery = productRef.orderBy("name")
                             .startAt(s.toString())
                             .endAt(s.toString() + "\uf8ff");
@@ -107,28 +111,27 @@ public class AdminControl extends AppCompatActivity {
                     FirestoreRecyclerOptions<Product> newOptions = new FirestoreRecyclerOptions.Builder<Product>()
                             .setQuery(searchQuery, Product.class)
                             .build();
-
+                    
                     //update options
                     adapter.updateOptions(newOptions);
-
-
+                    
                 } else {
+                    //if string is null/empty create simple query
                     FirestoreRecyclerOptions<Product> emptyOptions = new FirestoreRecyclerOptions.Builder<Product>()
                             .setQuery(productRef, Product.class)
                             .build();
-
+                    //update options
                     adapter.updateOptions(emptyOptions);
 
                 }
             }
         });
 
-
     }
 
 
     private void setUpProductsView(Query query) {
-        //set view
+        //set view based on query
         FirestoreRecyclerOptions<Product> options = new FirestoreRecyclerOptions.Builder<Product>()
                 .setQuery(query, Product.class)
                 .build();
@@ -140,11 +143,11 @@ public class AdminControl extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();//change data again
 
+        //Remove item
         if(authorizeUser) {
-            //delete single item with swipe action
             new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
                     ItemTouchHelper.RIGHT) {
-                //direction to delete
+
                 @Override
                 public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                     return false;
@@ -152,11 +155,10 @@ public class AdminControl extends AppCompatActivity {
 
                 @Override
                 public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
                     adapter.deleteItem(viewHolder.getAdapterPosition());
                 }
 
-                //on Swipe change color
+                //on Swipe action/effect
                 @Override
                 public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                     new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
@@ -165,12 +167,11 @@ public class AdminControl extends AppCompatActivity {
                             .create()
                             .decorate();
                     super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-
-
                 }
             }).attachToRecyclerView(recyclerView);
         }
 
+        //set onClick methods to views
         adapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(DocumentSnapshot documentSnapshot, int position, int caseView) {
@@ -178,10 +179,8 @@ public class AdminControl extends AppCompatActivity {
                 String id = documentSnapshot.getId();
                 String path = documentSnapshot.getReference().getPath();
 
-
-
+                //Update Product if first heading is touched
                   if((authorizeUser) && caseView == 1) {
-                          //UPDATE PRODUCT
                           //send document reference to update method in another activity
                           Toast.makeText(AdminControl.this,
                                   "Position: " + position + " ID: " + id + " " + caseView, Toast.LENGTH_SHORT).show();
@@ -191,6 +190,7 @@ public class AdminControl extends AppCompatActivity {
 
                   }
 
+                  //Get price in BsS if "BsS" tag is touched
                   if(caseView == 2){
                         //Show price in dollars
                         docRef = mStore.document(path); //get document data
@@ -199,55 +199,35 @@ public class AdminControl extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                                         if (documentSnapshot.exists()) {
-                                            final Double price = documentSnapshot.getDouble("price");
+                                            final Double productPrice = documentSnapshot.getDouble("price");
                                             Toast.makeText(AdminControl.this,
                                                     "Calculando precio en doláres...", Toast.LENGTH_LONG).show();
 
 
-                                            new Thread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    final Double calculo_precio, current_price;
-                                                    //set variable
-                                                    Document document;
-                                                    String send;
-                                                    Double result;
-                                                    try {
-                                                        document = Jsoup.connect("https://monitordolarvenezuela.com/").get();
-                                                        final String dolarData = document.select("div.back-white-tabla h6.text-center").text();
-                                                        send = dolarData.replaceAll("[^\\d.]+|\\.(?!\\d)", "");
-                                                        result = Double.parseDouble(send) * price;
-                                                    } catch (IOException e) {
-                                                        send = String.valueOf(e);
-                                                        result = 0.0;
-                                                        e.printStackTrace();
-                                                    }
+                                            final Double calculus_price, current_price;
+                                            SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
+                                            String price = sharedPreferences.getString("dollarPrice", "");
 
-                                                    calculo_precio = result; //pass only result
-                                                    current_price = Double.parseDouble(send);
+                                            //calculate price of product in sovereign bolivars
+                                            current_price = Double.parseDouble(price);
+                                            calculus_price = productPrice * current_price;
 
-
-                                                    mainHandler.post(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            //call dialog box and set text
-                                                            Bundle bundle = new Bundle();
-                                                            bundle.putDouble("price_dollars", calculo_precio);
-                                                            bundle.putDouble("current_dollar", current_price);
-                                                            DialogBox dialogMessage = new DialogBox();
-                                                            dialogMessage.setArguments(bundle);
-                                                            dialogMessage.show(getSupportFragmentManager(), "Dialog box");
-                                                        }
-                                                    });
-
-                                                }
-                                            }).start();
+                                            //send data to Dialog Box
+                                            Bundle bundle = new Bundle();
+                                            bundle.putDouble("price_dollars", calculus_price);
+                                            bundle.putDouble("current_dollar", current_price);
+                                            DialogBox dialogMessage = new DialogBox();
+                                            dialogMessage.setArguments(bundle);
+                                            dialogMessage.show(getSupportFragmentManager(), "Dialog box");
                                         }
-                                    }
-                                });
+
+
+
+                                        }
+                                    });
+                                }
                   }
 
-            }
 
         });
     }

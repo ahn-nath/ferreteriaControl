@@ -7,12 +7,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -20,48 +20,29 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
+import java.io.IOException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore mStore;
-    private DocumentReference usersRef;
-    private int userRole;
     int[] rubrosId = new int[10];
     TextView scr1;
     TableLayout t1;
     TableRow tr;
     LinearLayout l1;
     ImageView img1;
-    String userId;
-    int hello;
-    private boolean authorizeUser;
+    private Handler mainHandler = new Handler();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        t1 = (TableLayout) findViewById(R.id.t1);
+        t1 = findViewById(R.id.t1);
         t1.setColumnStretchable(0, true);
         t1.setColumnStretchable(1, true);
-        //Firebase
-        mAuth = FirebaseAuth.getInstance();
-        mStore = FirebaseFirestore.getInstance();
-        userId = mAuth.getCurrentUser().getUid();
-        usersRef = mStore.document("usuarios/" + userId);//get reference to the current user's document
 
-
-        //get data
-        SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
-        authorizeUser = sharedPreferences.getBoolean("isAdmin", false);
-        hello = sharedPreferences.getInt("role", 0);
-
+        //Values to use for the product's categories table layout
         String[] rubros = {
                 "Cerrajería",
                 "Electricidad e iluminación",
@@ -77,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         int[] images = new int[]{R.drawable.cat3, R.drawable.cat3};
         goView(rubros, images);
+        getCurrentDolarPrice();
 
     }
 
@@ -93,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.settings:
-                //intent
                 Intent intent = new Intent(getApplicationContext(), AdminControl.class);
                 startActivity(intent);
                 return true;
@@ -183,8 +164,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //send product category identifier to Product activity
         Intent intent = new Intent(getApplicationContext(), AdminControl.class);
         intent.putExtra("rubro", position);
-        intent.putExtra("userRole", userRole);
         startActivity(intent);
     }
 
+    public void getCurrentDolarPrice() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String current_price;
+                Document document;
+                String send;
+
+                try {
+                    document = Jsoup.connect("https://monitordolarvenezuela.com/").get();
+                    final String dolarData = document.select("div.back-white-tabla h6.text-center").text();
+                    send = dolarData.replaceAll("[^\\d.]+|\\.(?!\\d)", "");
+
+                } catch (IOException e) {
+                    send = String.valueOf(e);
+                    e.printStackTrace();
+                }
+
+                current_price = send;
+
+
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                       Toast.makeText(getApplicationContext(), "current dollar price" + current_price, Toast.LENGTH_SHORT).show();
+                        //sharedPreferences
+                        SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("dollarPrice", current_price);
+                        editor.apply();
+                    }
+                });
+
+            }
+        }).start();
+    }
 }
+
