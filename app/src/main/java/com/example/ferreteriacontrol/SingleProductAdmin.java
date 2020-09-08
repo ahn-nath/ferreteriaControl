@@ -6,11 +6,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.service.autofill.FillResponse;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.NumberPicker;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +29,8 @@ public class SingleProductAdmin extends AppCompatActivity {
     boolean update = false;
     EditText addName, addBrand, addPrice, addAmount;
     TextView headingSingleProduct;
+    RadioGroup measurementsGroup;
+    RadioButton measurement;
     NumberPicker addRubro;
 
     @Override
@@ -37,6 +42,8 @@ public class SingleProductAdmin extends AppCompatActivity {
         addPrice = findViewById(R.id.addPrice);
         addAmount = findViewById(R.id.addAmount);
         addRubro = findViewById(R.id.addRubro);
+        measurementsGroup = findViewById(R.id.measurementsGroup);
+
         String[] rubros = { //shall this go here, don't think so
                 "Cerrajería",
                 "Electricidad, iluminación y conductores",
@@ -49,6 +56,7 @@ public class SingleProductAdmin extends AppCompatActivity {
                 "Misceláneos",
                 "Herramientas manuales y eléctricas",
                 "Remate"};
+
 
         addRubro.setDisplayedValues(rubros);
         addRubro.setMinValue(1);
@@ -106,29 +114,57 @@ public class SingleProductAdmin extends AppCompatActivity {
     }
 
     private void saveProduct() {
+
+        boolean  unitValue =  ((measurementsGroup.getCheckedRadioButtonId() == -1) ? false : true);
+
+        if (TextUtils.isEmpty(addName.getText().toString())) {
+            addName.setError("El nombre de producto es obligatorio");
+           return;
+        }
+
+        if (TextUtils.isEmpty(addBrand.getText().toString())) {
+            addBrand.setError("La marca es obligatoria");
+            return;
+        }
+
+        if (TextUtils.isEmpty(addPrice.getText().toString())) {
+            addPrice.setError("El precio es obligatorio");
+            return;
+        }
+
+        if (TextUtils.isEmpty(addAmount.getText().toString())) {
+            addAmount.setError("La cantidad es obligatoria");
+            return;
+        }
+
+        if (!unitValue) {
+            Toast.makeText(getApplicationContext(),"La unidad es obligatoria", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+
+        //add values
         String name = addName.getText().toString();
         String brand = addBrand.getText().toString();
         String image = "1gzBdMzE-d-JWsIHOUl4ofW4GlLv0LVmH"; //temporary
+        measurement = findViewById(measurementsGroup.getCheckedRadioButtonId());
+        String unit = measurement.getText().toString();
         double price = Double.parseDouble(addPrice.getText().toString());
         int amount = Integer.parseInt(addAmount.getText().toString());
         int group = addRubro.getValue();
-
-        /*
-        //add validation to fields: check if empty
-        * */
 
         //if we received an id to update the product
         if (update) {
             //Update product
             docRef.update("name", name,
-                    "brand", brand, "price", price, "amount", amount, "group", group);
+                    "brand", brand, "price", price, "amount", amount, "unit", unit, "group", group);
             Toast.makeText(this, "Producto Actualizado", Toast.LENGTH_SHORT).show();
             finish();
         }
         else {
             //Add new product
             CollectionReference notebookRef = mStore.collection("Productos");
-            notebookRef.add(new Product(name, brand, price, amount, image, group));
+            notebookRef.add(new Product(name, brand, price, amount, unit, image, group));
             Toast.makeText(this, "Producto Agregado", Toast.LENGTH_SHORT).show();
             finish();
         }

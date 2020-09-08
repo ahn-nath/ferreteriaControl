@@ -6,13 +6,16 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -25,7 +28,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -41,7 +51,11 @@ public class AdminControl extends AppCompatActivity {
     private boolean authorizeUser;
     EditText searchText;
     FloatingActionButton buttonAddProduct;
-    private Handler mainHandler = new Handler();
+    FloatingActionButton buttonImport;
+    //import products
+    private List<Product> CSVSamples = new ArrayList<>();
+    private static final int OPEN_REQUEST_CODE = 41;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +63,7 @@ public class AdminControl extends AppCompatActivity {
         setContentView(R.layout.activity_products);
         searchText = findViewById(R.id.searchText);
         buttonAddProduct = findViewById(R.id.button_add_product);
+        buttonImport = findViewById(R.id.button_import);
 
         //get user's role and position
         SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
@@ -57,6 +72,7 @@ public class AdminControl extends AppCompatActivity {
 
         if(authorizeUser){
             //Make add product button visible for this activity
+            buttonImport.setVisibility(View.VISIBLE);
             buttonAddProduct.setVisibility(View.VISIBLE);
             buttonAddProduct.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -231,6 +247,79 @@ public class AdminControl extends AppCompatActivity {
 
         });
     }
+
+
+
+
+    //Import data to database
+    //read data from file and update database
+    public void readFile(View view) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/*");
+        startActivityForResult(intent, OPEN_REQUEST_CODE);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+        Uri currentUri = null;
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == OPEN_REQUEST_CODE) {
+                if (resultData != null) {
+                    currentUri = resultData.getData();
+                    getDataFromExcel(currentUri); //if successful
+                }
+            }
+        }
+    }
+
+    public void getDataFromExcel(Uri currentUri) {
+        String line = "";
+        //read each line of document one by one
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(currentUri);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
+            //Skip headers
+            reader.readLine();
+            while((line = reader.readLine()) != null){
+                Log.d("Activity", "Line: " + line); //to debug code
+                //Split by semicolon
+                String[] tokens = line.split(";");
+                //Read data
+                Product product = new Product();
+                //handle empty values [function]
+
+                product.setName(tokens[0]); //column: name
+                product.setBrand(tokens[1]); //column: brand
+                product.setAmount(Integer.parseInt(tokens[2])); //column: amount
+                product.setUnit(tokens[3]); //column: unit
+                product.setPrice(Double.parseDouble(tokens[4])); //column: price
+                product.setGroup(Integer.parseInt(tokens[5])); //column: group
+                CSVSamples.add(product); //add document to ArrayList
+
+                Log.d("Activity", "Document: " + product);
+            }
+        } catch (IOException e) {
+            Log.wtf("Activity: ", "Error trying to parse document. Line:" + line, e);
+            e.printStackTrace();
+        }
+
+        //Add documents to Firebase
+        if(CSVSamples != null){
+            Toast.makeText(getApplicationContext(), "Actualizando base de datos...", Toast.LENGTH_LONG).show();
+            CollectionReference notebookRef = mStore.collection("Productos");
+            for(int i = 0; i < CSVSamples.size(); i++) {
+                notebookRef.add(CSVSamples.get(i));
+
+            }
+            Toast.makeText(getApplicationContext(), "Base de datos actualizada", Toast.LENGTH_LONG).show();
+
+        }
+
+
+    }
+
+
 
     @Override
     protected void onStart() {

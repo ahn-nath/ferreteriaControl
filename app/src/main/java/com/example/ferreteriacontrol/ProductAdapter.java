@@ -29,7 +29,7 @@ public class ProductAdapter extends FirestoreRecyclerAdapter<Product, ProductAda
         holder.productName.setText(model.getName());
         holder.productBrand.setText(model.getBrand());
         holder.productPrice.setText(String.valueOf(model.getPrice()) + "$");
-        holder.productAmount.setText("Cantidad: " + String.valueOf(model.getAmount()));
+        holder.productAmount.setText("Cantidad: " + String.valueOf(model.getAmount()) + " " + model.getUnit());
         holder.productImage.setVisibility(View.INVISIBLE);
 
         if (includeImage) {
