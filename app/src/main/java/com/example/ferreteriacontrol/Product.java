@@ -1,5 +1,7 @@
 package com.example.ferreteriacontrol;
 
+import androidx.annotation.NonNull;
+
 public class Product {
     private String image;
     private String name;
@@ -89,4 +91,10 @@ public class Product {
         this.group = group;
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return this.name + ";" + this.brand + ";" + this.amount + ";" +
+                this.unit + ";" + this.price + ";" + this.group;
+    }
 }

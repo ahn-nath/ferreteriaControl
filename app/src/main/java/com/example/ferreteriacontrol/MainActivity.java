@@ -89,8 +89,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.settings:
-                Intent intent = new Intent(getApplicationContext(), AdminControl.class);
-                startActivity(intent);
+                Intent intent1 = new Intent(getApplicationContext(), AdminControl.class);
+                startActivity(intent1);
+                return true;
+
+            case R.id.contact:
+                Intent intent2 = new Intent(getApplicationContext(), ContactUs.class);
+                startActivity(intent2);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -205,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                       Toast.makeText(getApplicationContext(), "current dollar price" + current_price, Toast.LENGTH_SHORT).show();
+                       Toast.makeText(getApplicationContext(), "Precio de dólar actual: " + current_price, Toast.LENGTH_SHORT).show();
                         //sharedPreferences
                         SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();

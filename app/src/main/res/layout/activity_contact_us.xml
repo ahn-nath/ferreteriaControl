@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+android:padding="20dp"
+tools:context=".ContactUs">
+
+
+    <EditText
+        android:id="@+id/contactSubject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:hint="Asunto"
+        android:inputType="textEmailSubject" />
+
+    <EditText
+        android:id="@+id/contactMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:gravity="start|top"
+        android:hint="Mensaje"
+        android:lines="10" />
+    <Button
+        android:id="@+id/contactButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="sendEmail"
+        android:text="Enviar" />
+
+    <!--Add contact info later-->
+
+
+
+</LinearLayout>

@@ -2,9 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+    <item
+        android:id="@+id/contact"
+        android:icon="@drawable/ic_email"
+        android:title="Admin Control"
+        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/settings"
         android:icon="@drawable/ic_settings"
         android:title="Admin Control"
         app:showAsAction="ifRoom" />
+
+
 </menu>
