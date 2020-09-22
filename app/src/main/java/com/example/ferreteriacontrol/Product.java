@@ -35,6 +35,7 @@ public class Product {
     public Product(){
         //empty constructor
     }
+
     public String getImage() {
         return image;
     }
@@ -67,28 +68,103 @@ public class Product {
         this.image = image;
     }
 
-    public void setName(String name) {
-        this.name = name.trim();
+    public boolean setName(String name) {
+        if(name.trim() != null && name.trim().length() > 3) {
+            this.name = name.trim();
+            return true;
+        }
+        return false;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand.trim();
+    public boolean setBrand(String brand) {
+        if(brand.trim() != null && brand.trim().length() > 3) {
+            this.brand = brand.trim();
+            return true;
+        }
+        return false;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public boolean setPrice(double price) {
+        if(price > 0.0) {
+            this.price = price;
+            return true;
+        }
+        return false;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public boolean setAmount(int amount) {
+        if(amount > 0) {
+            this.amount = amount;
+            return true;
+        }
+        return false;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public boolean setUnit(String unit) {
+      unit = unit.toLowerCase();
+        if(unit != null && (unit.trim().equals("u") || unit.trim().equals("kg") || unit.trim().equals("g"))) {
+            this.unit = unit;
+            return true;
+        }
+        return false;
     }
 
-    public void setGroup(int group) {
-        this.group = group;
+    public boolean setGroup(int group) {
+        if(group > 0 && group <= 11) {
+            this.group = group;
+            return true;
+        }
+        return false;
+        }
+
+    public boolean readContentExcel(String token, int c){
+    switch (c){
+        case 0:
+            return setName(token);
+
+        case 1:
+            return setBrand(token);
+
+        case 2:
+            if(isNumeric(token, 1)) {
+                return setAmount(Integer.parseInt(token));
+            }
+            return false;
+
+        case 3:
+            return setUnit(token);
+
+        case 4:
+            if(isNumeric(token, 2)) {
+             return setPrice(Double.parseDouble(token));
+            }
+            return false;
+
+        case 5:
+            if(isNumeric(token, 1)) {
+                return setGroup(Integer.parseInt(token));
+            }
+            return false;
+    }
+
+    return false;
+    }
+
+    private static boolean isNumeric(String strNum, int c) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            if(c == 1) {
+                int i = Integer.parseInt(strNum);
+            }
+            if(c == 2){
+                double d = Double.parseDouble(strNum);
+            }
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 
     @NonNull

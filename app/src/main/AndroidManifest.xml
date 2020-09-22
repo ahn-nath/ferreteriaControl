@@ -11,7 +11,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ContactUs"></activity>
+        <activity android:name=".waitingRoom"
+            android:theme="@style/Theme.Design.Light.NoActionBar"></activity>
+        <activity
+            android:name=".ContactUs"
+            android:theme="@style/Theme.Design.Light.NoActionBar" />
         <activity android:name=".SingleProductAdmin" />
         <activity android:name=".AdminControl" />
         <activity

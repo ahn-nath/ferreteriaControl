@@ -102,6 +102,7 @@ public class SignUp extends AppCompatActivity {
                     Map<String, Object> user = new HashMap<>();
                     user.put("email", email);
                     user.put("rol", "3");
+                    user.put("access", 0);
 
                     documentReference.set(user)
 
@@ -109,7 +110,7 @@ public class SignUp extends AppCompatActivity {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Toast.makeText(SignUp.this, "Datos agregados de forma exitosa", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                            startActivity(new Intent(getApplicationContext(), waitingRoom.class));
 
                         }
                     }).addOnFailureListener(new OnFailureListener() {

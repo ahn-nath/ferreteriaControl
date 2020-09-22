@@ -30,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -190,32 +191,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final String current_price;
+                final String current_price, msg;
+                final boolean isNumeric;
                 Document document;
-                String send;
+                String send = null, message;
 
                 try {
                     document = Jsoup.connect("https://monitordolarvenezuela.com/").get();
                     final String dolarData = document.select("div.back-white-tabla h6.text-center").text();
                     send = dolarData.replaceAll("[^\\d.]+|\\.(?!\\d)", "");
+                    message = "Precio del dólar: ";
+
+                } catch (UnknownHostException e) {
+                    message = "No se pudo obtener la información del URL designado";
+                    Log.d("Error:", e.toString());
+                    e.printStackTrace();
 
                 } catch (IOException e) {
-                    send = String.valueOf(e);
                     e.printStackTrace();
+                    message = e.toString();
                 }
 
-                current_price = send;
 
+                current_price = send;
+                isNumeric = isNumeric(current_price);
+                msg = message;
 
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                       Toast.makeText(getApplicationContext(), "Precio de dólar actual: " + current_price, Toast.LENGTH_SHORT).show();
-                        //sharedPreferences
-                        SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("dollarPrice", current_price);
-                        editor.apply();
+                        if (current_price != null && (isNumeric)) {
+                            //sharedPreferences
+                            Toast.makeText(getApplicationContext(), msg + current_price + isNumeric, Toast.LENGTH_LONG).show();
+                            SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("dollarPrice", current_price);
+                            editor.apply();
+                        }else{
+                                Toast.makeText(getApplicationContext(),"Precio del dólar: " + msg, Toast.LENGTH_LONG).show();
+                            }
+
                     }
                 });
 
@@ -223,7 +238,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }).start();
     }
 
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(strNum);
 
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
 
 
     }

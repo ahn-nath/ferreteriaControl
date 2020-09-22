@@ -15,12 +15,16 @@
         android:padding="15dp"
         android:gravity="center">
         <!--Image = description-->
+
         <ImageView
             android:id="@+id/productImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="3dp"
+            android:layout_marginRight="10dp"
             android:padding="2dp"
-            android:layout_marginRight="10dp" />
+            android:src="@drawable/no_image" />
 
         <TextView
             android:id="@+id/productName"

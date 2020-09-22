@@ -35,6 +35,7 @@ public class ProductAdapter extends FirestoreRecyclerAdapter<Product, ProductAda
         if (includeImage) {
             Picasso.get()
                     .load("https://drive.google.com/uc?id=" + (model.getImage()))//add real url later
+                    .error(R.drawable.no_image).resize(150,150).centerCrop()
                     .resize(200, 200)
                     .centerCrop()
                     .into(holder.productImage);

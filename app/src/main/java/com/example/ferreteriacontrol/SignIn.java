@@ -42,7 +42,7 @@ public class SignIn extends AppCompatActivity {
         super.onStart();
         //if there's a user logged in redirect
         if(mAuth.getCurrentUser() != null){
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            startActivity(new Intent(getApplicationContext(), waitingRoom.class));
             finish();
         }
     }

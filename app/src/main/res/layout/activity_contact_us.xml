@@ -1,38 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:orientation="vertical"
-android:padding="20dp"
-tools:context=".ContactUs">
-
-
-    <EditText
-        android:id="@+id/contactSubject"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="monospace"
-        android:hint="Asunto"
-        android:inputType="textEmailSubject" />
+        android:layout_marginVertical="16dp"
+        tools:context=".ContactUs">
 
-    <EditText
-        android:id="@+id/contactMessage"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="monospace"
-        android:gravity="start|top"
-        android:hint="Mensaje"
-        android:lines="10" />
-    <Button
-        android:id="@+id/contactButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="sendEmail"
-        android:text="Enviar" />
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        android:orientation="vertical"
+        android:padding="10dp"
+     >
 
-    <!--Add contact info later-->
+        <ImageView
+            android:id="@+id/contactLogo"
+            android:layout_width="115dp"
+            android:layout_height="140dp"
+            android:layout_gravity="center"
+            android:src="@drawable/nt" />
+
+        <TextView
+            android:id="@+id/contactHeading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp"
+            android:text="Ferretería y Materiales La Vaquera C.A."
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/colorPrimaryDark"
+            android:textFontWeight="900"
+            android:textSize="19sp" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:background="#E2F4F4F4"
+            android:padding="15dp">
+
+            <ImageView
+                android:id="@+id/emailIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:src="@drawable/ic_email"
+                android:tint="@color/colorPrimary" />
+
+            <TextView
+                android:id="@+id/contactEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/emailIcon"
+                android:fontFamily="monospace"
+                android:gravity="left"
+                android:paddingVertical="5dp"
+                android:text="hvtoledo@gmail.com"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textColor="#393939" />
 
 
+            <ImageView
+                android:id="@+id/phoneIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/contactEmail"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:src="@drawable/ic_phone_dp"
+                android:tint="@color/colorPrimary" />
 
-</LinearLayout>
+            <TextView
+                android:id="@+id/contactPhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/contactEmail"
+                android:layout_toEndOf="@id/phoneIcon"
+                android:fontFamily="monospace"
+                android:gravity="left"
+                android:paddingVertical="5dp"
+                android:text="+58 416-8280-699"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textColor="#393939" />
+
+
+            <ImageView
+                android:id="@+id/addressIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/contactPhone"
+                android:layout_alignParentBottom="true"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:src="@drawable/ic_place"
+                android:tint="@color/colorPrimary" />
+
+            <TextView
+                android:id="@+id/contactAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/contactPhone"
+                android:layout_toEndOf="@id/phoneIcon"
+                android:fontFamily="monospace"
+                android:gravity="left"
+                android:paddingVertical="5dp"
+                android:text="Km 3 Junquito, Niño Jesús, Calle La Vaquera, Local #16"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textColor="#393939" />
+
+
+        </RelativeLayout>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:fontFamily="monospace"
+            android:text="Envíanos un correo"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#000000" />
+
+        <EditText
+            android:id="@+id/contactSubject"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:hint="Asunto"
+            android:inputType="textEmailSubject"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+        <EditText
+            android:id="@+id/contactMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:gravity="start|top"
+            android:hint="Mensaje"
+            android:lines="10"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+        <Button
+            android:id="@+id/contactButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:onClick="sendEmail"
+            android:text="Enviar"
+            android:textColor="#FFFFFF" />
+
+        <!--Add contact info later-->
+    </LinearLayout>
+
+    </ScrollView>

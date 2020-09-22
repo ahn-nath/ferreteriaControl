@@ -56,6 +56,7 @@ public class AdminControl extends AppCompatActivity {
     EditText searchText;
     FloatingActionButton buttonAddProduct;
     FloatingActionButton buttonImport;
+    FloatingActionButton buttonExport;
     //import products
     private List<Product> CSVSamples = new ArrayList<>();
     private static final int OPEN_REQUEST_CODE = 41;
@@ -69,6 +70,7 @@ public class AdminControl extends AppCompatActivity {
         searchText = findViewById(R.id.searchText);
         buttonAddProduct = findViewById(R.id.button_add_product);
         buttonImport = findViewById(R.id.button_import);
+        buttonExport = findViewById(R.id.button_export);
 
         //get user's role and position
         SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
@@ -78,6 +80,7 @@ public class AdminControl extends AppCompatActivity {
         if (authorizeUser) {
             //Make add product button visible for this activity
             buttonImport.setVisibility(View.VISIBLE);
+            buttonExport.setVisibility(View.VISIBLE);
             buttonAddProduct.setVisibility(View.VISIBLE);
             buttonAddProduct.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -157,7 +160,7 @@ public class AdminControl extends AppCompatActivity {
                 .setQuery(query, Product.class)
                 .build();
 
-        adapter = new ProductAdapter(options, false);
+        adapter = new ProductAdapter(options, true);
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -346,50 +349,80 @@ public class AdminControl extends AppCompatActivity {
 
     public void getDataFromExcel(Uri currentUri) {
         String line = "";
+        int totalDoc = 0;
+        int f = 0;
+        int s = 0;
+        boolean finalResult = false;
         //read each line of document one by one
         try {
             InputStream inputStream = getContentResolver().openInputStream(currentUri);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
-            //Skip headers
+
+
+            //Skip headers of the file
             reader.readLine();
+            int c;
             while ((line = reader.readLine()) != null) {
+                totalDoc++;
                 Log.d("Activity", "Line: " + line); //to debug code
-                //Split by semicolon
-                String[] tokens = line.split(";");
-                //Read data
+                String[] tokens = line.split(";|,"); //Split string by semicolon/comma
+                c = 0;
+                //Read and validate the data
                 Product product = new Product();
-                //handle empty values [function]
-
-                product.setName(tokens[0]); //column: name
-                product.setBrand(tokens[1]); //column: brand
-                product.setAmount(Integer.parseInt(tokens[2])); //column: amount
-                product.setUnit(tokens[3]); //column: unit
-                product.setPrice(Double.parseDouble(tokens[4])); //column: price
-                product.setGroup(Integer.parseInt(tokens[5])); //column: group
-                CSVSamples.add(product); //add document to ArrayList
-
-                Log.d("Activity", "Document: " + product);
+                boolean result = true; //used to determine if an object should be added to ArrayList
+                Log.d("Activity", "alength: " + tokens.length); //to debug code
+                if (tokens.length == 6) {
+                    while (c < 6) {
+                        boolean wasSuccessful = product.readContentExcel(tokens[c], c); //determine if the value was set to attribut
+                        Log.d("Success case", "counter:" + c + " result:" + wasSuccessful);
+                        if (!wasSuccessful) { //if one of the values were not correct, end the process and return false
+                            result = false;
+                            break;
+                        }
+                        c++;
+                    }
+                    Log.d("Success case", "counter:" + c + " result final product:" + result);
+                    if (result) { //if all the values were correct, add new object
+                        s++; //successful document
+                        CSVSamples.add(product); //add document to ArrayList
+                        Log.d("Activity", "Document: " + product);
+                    }
+                } else { //raise invalid format exception. Check later
+                    throw new IllegalArgumentException("El formato del documento es inválido");
+                }
             }
+
+            f = totalDoc - s; //total amount of documents less successful cases
+            Log.d("Failed", "total " + totalDoc + "succ " + s + "failed " + f);
+
+
         } catch (IOException e) {
-            Log.wtf("Activity: ", "Error trying to parse document. Line:" + line, e);
+            Log.d("Activity: ", "Error trying to parse document. Line:" + line, e);
             e.printStackTrace();
+        } catch (IllegalArgumentException ex) {
+            Log.d("Problem: ", "Error with the format of the doc. Line:" + line, ex);
+            Toast.makeText(getApplicationContext(), "Formato inválido", Toast.LENGTH_LONG).show();
         }
 
         //Add documents to Firebase
-        if (CSVSamples != null) {
+        if (CSVSamples.size() > 0) {
+            //counter: agregar casos exitosos, formatos inválidos
             Toast.makeText(getApplicationContext(), "Actualizando base de datos...", Toast.LENGTH_LONG).show();
             CollectionReference notebookRef = mStore.collection("Productos");
             for (int i = 0; i < CSVSamples.size(); i++) {
                 notebookRef.add(CSVSamples.get(i));
 
             }
-            Toast.makeText(getApplicationContext(), "Base de datos actualizada", Toast.LENGTH_LONG).show();
+            finalResult = true;
 
         }
-
-
+        //Sucess or Failure : client
+        if (finalResult) {
+            Toast.makeText(getApplicationContext(), "Base de datos actualizada." + " Total:" + totalDoc + " Casos exitosos:" + s + " Casos fállidos:" + f, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "No se pudo actualizar la base de datos. Revise el formato del documento", Toast.LENGTH_LONG).show();
+        }
     }
-
 
     @Override
     protected void onStart() {
