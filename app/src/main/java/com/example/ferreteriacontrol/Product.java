@@ -7,7 +7,7 @@ public class Product {
     private String name;
     private  String brand;
     private  String unit;
-    private double price; //change it to double
+    private double price;
     private int amount;
     private int group;
 
@@ -70,7 +70,7 @@ public class Product {
 
     public boolean setName(String name) {
         if(name.trim() != null && name.trim().length() > 3) {
-            this.name = name.trim();
+            this.name = name.trim().substring(0,1).toUpperCase() + name.trim().substring(1);
             return true;
         }
         return false;
@@ -78,7 +78,7 @@ public class Product {
 
     public boolean setBrand(String brand) {
         if(brand.trim() != null && brand.trim().length() > 3) {
-            this.brand = brand.trim();
+            this.brand = brand.trim().substring(0,1).toUpperCase() + brand.trim().substring(1);
             return true;
         }
         return false;
@@ -151,7 +151,7 @@ public class Product {
     }
 
     private static boolean isNumeric(String strNum, int c) {
-        if (strNum == null) {
+        if (strNum.trim() == null) {
             return false;
         }
         try {

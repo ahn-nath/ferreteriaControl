@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,13 +124,18 @@ public class AdminControl extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                String st;
                 if (s.toString() != null) {
+                    if(s.toString().length() > 0) {
+                        st = s.toString().substring(0, 1).toUpperCase() + s.toString().substring(1);
+                    }else{
+                        st = s.toString();
+                    }
 
                     //create query with inputted value
                     Query searchQuery = productRef.orderBy("name")
-                            .startAt(s.toString())
-                            .endAt(s.toString() + "\uf8ff");
+                            .startAt(st)
+                            .endAt(st + "\uf8ff");
 
                     //new options
                     FirestoreRecyclerOptions<Product> newOptions = new FirestoreRecyclerOptions.Builder<Product>()

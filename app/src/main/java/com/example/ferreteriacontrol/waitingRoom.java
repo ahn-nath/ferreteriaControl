@@ -50,6 +50,20 @@ public class waitingRoom extends AppCompatActivity {
         }
     }
 
+    //check if already existing/logged in user
+    @Override
+    public void onStart() {
+        super.onStart();
+        //if there's a user logged in redirect
+        if(mAuth.getCurrentUser() == null){
+            Log.d("Error", "no está creado");
+            startActivity(new Intent(getApplicationContext(), SignIn.class));
+            finish();
+        }
+    }
+
+
+
     public void verifyUser(){
         Toast.makeText(getApplicationContext(), "Verificando nuevas actualizaciones...", Toast.LENGTH_SHORT).show();
         //Store user's role

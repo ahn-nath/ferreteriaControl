@@ -28,6 +28,7 @@ public class SignUp extends AppCompatActivity {
     private FirebaseFirestore mStore;
     EditText emailUser, passwordUser;
     String userId;
+    DialogBox loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,7 @@ public class SignUp extends AppCompatActivity {
         mStore = FirebaseFirestore.getInstance();
         emailUser =  findViewById(R.id.emailUser);
         passwordUser = findViewById(R.id.passwordUser);
+        loadingDialog = new DialogBox(SignUp.this);
     }
 
     //check if already existing/logged in user
@@ -72,13 +74,14 @@ public class SignUp extends AppCompatActivity {
         }
 
         //progressBar.setVisibility(View.VISIBLE);
-
+        loadingDialog.loginLoadDialog();
 
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull final Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     //send verification email link
+                    loadingDialog.dismissDialog();
                     FirebaseUser fuser = mAuth.getCurrentUser();
                     fuser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -123,8 +126,9 @@ public class SignUp extends AppCompatActivity {
 
 
                 } else {
-                    Toast.makeText(SignUp.this, "No se pudo registrar su cuenta" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUp.this, "No se pudo registrar su cuenta " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     //progressBar.setVisibility(View.GONE);
+                    loadingDialog.dismissDialog();
                 }
             }
         });

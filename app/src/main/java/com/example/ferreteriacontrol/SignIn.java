@@ -25,6 +25,7 @@ public class SignIn extends AppCompatActivity {
     private DocumentReference usersRef;
     String userId;
     EditText emailLogin, passwordLogin;
+    DialogBox loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,7 @@ public class SignIn extends AppCompatActivity {
         mStore = FirebaseFirestore.getInstance();
         emailLogin = findViewById(R.id.emailLogin);
         passwordLogin = findViewById(R.id.passwordLogin);
+        loadingDialog = new DialogBox(SignIn.this);
     }
 
     //check if already existing/logged in user
@@ -48,33 +50,37 @@ public class SignIn extends AppCompatActivity {
     }
 
     public void Login(View v) {
+        //save values
         String email = emailLogin.getText().toString().trim();
         String password = passwordLogin.getText().toString().trim();
 
         //Validate values
         if (TextUtils.isEmpty(email)) {
-            emailLogin.setError("Email is Required.");
+            emailLogin.setError("El email es obligatorio.");
             return;
         }
 
         if (TextUtils.isEmpty(password)) {
-            passwordLogin.setError("Password is Required.");
+            passwordLogin.setError("La contraseña es obligatoria.");
             return;
         }
 
         if (password.length() < 6) {
-            passwordLogin.setError("Password Must be >= 6 Characters");
+            passwordLogin.setError("La contraseña debe ser >= a 6 carácteres");
             return;
         }
 
         //progressBar.setVisibility(View.VISIBLE);
+        //show loading box
+        loadingDialog.loginLoadDialog();
 
         // Authenticate user
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-
+                    //progressBar.setVisibility(View.GONE);
+                    loadingDialog.dismissDialog();
                     Toast.makeText(SignIn.this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
 
                     //Store user's role
@@ -103,6 +109,7 @@ public class SignIn extends AppCompatActivity {
                 else {
                     Toast.makeText(SignIn.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     //progressBar.setVisibility(View.GONE);
+                    loadingDialog.dismissDialog();
                 }
             }
 

@@ -3,11 +3,10 @@ package com.example.ferreteriacontrol;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Activity;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -23,23 +22,17 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.FirebaseAuth;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DecimalFormat;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private FirebaseFirestore mStore = FirebaseFirestore.getInstance();
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     int[] rubrosId = new int[10];
     TextView scr1;
     TableLayout t1;
@@ -90,13 +83,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.settings:
-                Intent intent1 = new Intent(getApplicationContext(), AdminControl.class);
-                startActivity(intent1);
+                startActivity(new Intent(getApplicationContext(), AdminControl.class));
                 return true;
 
             case R.id.contact:
-                Intent intent2 = new Intent(getApplicationContext(), ContactUs.class);
-                startActivity(intent2);
+                startActivity(new Intent(getApplicationContext(), ContactUs.class));
+                return true;
+
+            case R.id.logOut:
+                mAuth.signOut();
+                startActivity(new Intent(getApplicationContext(), SignIn.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -212,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     message = e.toString();
                 }
 
-
+                //Format price
                 current_price = send;
                 isNumeric = isNumeric(current_price);
                 msg = message;
@@ -222,10 +218,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void run() {
                         if (current_price != null && (isNumeric)) {
                             //sharedPreferences
+                            Double amount = Double.parseDouble(current_price);
                             Toast.makeText(getApplicationContext(), msg + current_price + isNumeric, Toast.LENGTH_LONG).show();
                             SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString("dollarPrice", current_price);
+                            editor.putString("dollarPrice", current_price.toString());
                             editor.apply();
                         }else{
                                 Toast.makeText(getApplicationContext(),"Precio del dólar: " + msg, Toast.LENGTH_LONG).show();
