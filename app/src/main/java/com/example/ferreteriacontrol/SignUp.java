@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class SignUp extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -47,7 +48,7 @@ public class SignUp extends AppCompatActivity {
         super.onStart();
         //if there's a user logged in redirect
         if(mAuth.getCurrentUser() != null){
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            startActivity(new Intent(getApplicationContext(), waitingRoom.class));
             finish();
         }
     }
@@ -73,17 +74,17 @@ public class SignUp extends AppCompatActivity {
             return;
         }
 
-        //progressBar.setVisibility(View.VISIBLE);
-        loadingDialog.loginLoadDialog();
 
+        loadingDialog.loginLoadDialog();
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull final Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     //send verification email link
                     loadingDialog.dismissDialog();
+
                     FirebaseUser fuser = mAuth.getCurrentUser();
-                    fuser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    Objects.requireNonNull(fuser).sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Toast.makeText(SignUp.this, "Se ha enviado un email a su correo para verificar la cuenta", Toast.LENGTH_SHORT).show();
@@ -97,11 +98,9 @@ public class SignUp extends AppCompatActivity {
                     });
 
                    //Create user and add custom fields to database
+                    //Get reference to the collection in database and add values
                     userId = mAuth.getCurrentUser().getUid();
-
-                   //Get reference to the collection in database and add values
                     DocumentReference documentReference = mStore.collection("usuarios").document(userId);
-
                     Map<String, Object> user = new HashMap<>();
                     user.put("email", email);
                     user.put("rol", "3");
@@ -119,15 +118,14 @@ public class SignUp extends AppCompatActivity {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(SignUp.this, "Hubo un inconveniente con la base de datos" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignUp.this, "Hubo un inconveniente con la base de datos" + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
 
                         }
                     });
 
 
                 } else {
-                    Toast.makeText(SignUp.this, "No se pudo registrar su cuenta " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    //progressBar.setVisibility(View.GONE);
+                    Toast.makeText(SignUp.this, "No se pudo registrar su cuenta " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                     loadingDialog.dismissDialog();
                 }
             }

@@ -19,6 +19,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Objects;
+
 public class SignIn extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore mStore;
@@ -70,7 +72,6 @@ public class SignIn extends AppCompatActivity {
             return;
         }
 
-        //progressBar.setVisibility(View.VISIBLE);
         //show loading box
         loadingDialog.loginLoadDialog();
 
@@ -79,21 +80,24 @@ public class SignIn extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    //progressBar.setVisibility(View.GONE);
+
+                    //if signed in
                     loadingDialog.dismissDialog();
                     Toast.makeText(SignIn.this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
 
-                    //Store user's role
-                    userId = mAuth.getCurrentUser().getUid();
+                    //store user's role to check if is an admin
+                    userId = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
                     usersRef = mStore.document("usuarios/" + userId);//get reference to the current user's document
                     usersRef.get()
                             .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                 @Override
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                                     if (documentSnapshot.exists()) {
-                                        int role =  Integer.parseInt(documentSnapshot.get("rol").toString());
-                                        boolean isAdmin = (role == 1);
-                                        //save role and boolean value to SharedPreferences
+                                        int role =  Integer.parseInt(Objects.requireNonNull(documentSnapshot.get("rol")).toString());
+                                        boolean isAdmin = (role == 1 || role == 2); //if the role correspond to admin, set to true
+
+                                        //save role and boolean value to SharedPreferences.
+                                        // We need to validate that the user logging in is an admin, to evaluate access level
                                         SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
                                         SharedPreferences.Editor editor = sharedPreferences.edit();
                                         editor.putInt("role", role);
@@ -107,8 +111,7 @@ public class SignIn extends AppCompatActivity {
                 }
 
                 else {
-                    Toast.makeText(SignIn.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    //progressBar.setVisibility(View.GONE);
+                    Toast.makeText(SignIn.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                     loadingDialog.dismissDialog();
                 }
             }

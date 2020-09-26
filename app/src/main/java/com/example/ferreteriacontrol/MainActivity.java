@@ -63,14 +63,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 "Misceláneos",
                 "Herramientas manuales y eléctricas"
         };
-
+        //connect with actual images
         int[] images = new int[]{R.drawable.cat3, R.drawable.cat3};
         goView(rubros, images);
         getCurrentDolarPrice();
 
     }
 
-    //add admin icon to top bar
+    //Top nav bar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
             MenuInflater inflater = getMenuInflater();
@@ -92,6 +92,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.logOut:
                 mAuth.signOut();
+                //remove hasAccess value to verify again in case is a different user when logged in
+                SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
+                sharedPreferences.edit().remove("hasAccess").apply();
+
                 startActivity(new Intent(getApplicationContext(), SignIn.class));
                 return true;
             default:
@@ -101,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-    //set table with product categories
+    //set TableView with product categories
     public void goView(String[] rubros, int[] images) {
         int en = 0, color = 0xFFFFFFFF;
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -122,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             scr1 = new TextView(this);
 
             // Linear Layout
-            rubrosId[j] = l1.generateViewId(); //generate view id and save it to array
+            rubrosId[j] = View.generateViewId(); //generate view id and save it to array
             l1.setId(rubrosId[j]);
             l1.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT, 5f));
             l1.setOrientation(LinearLayout.VERTICAL);
@@ -183,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(intent);
     }
 
+    //get value from webpage (current dollar price)
     public void getCurrentDolarPrice() {
         new Thread(new Runnable() {
             @Override
@@ -208,21 +213,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     message = e.toString();
                 }
 
-                //Format price
+                //set values to final variables
                 current_price = send;
-                isNumeric = isNumeric(current_price);
-                msg = message;
+                isNumeric = isNumeric(current_price); //validate that the value could be converted to number
+                msg = message; //message for each case [successful, failed]
 
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        //if the value [string] is not null and could be converted to number
                         if (current_price != null && (isNumeric)) {
                             //sharedPreferences
-                            Double amount = Double.parseDouble(current_price);
                             Toast.makeText(getApplicationContext(), msg + current_price + isNumeric, Toast.LENGTH_LONG).show();
                             SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString("dollarPrice", current_price.toString());
+                            editor.putString("dollarPrice", current_price);
                             editor.apply();
                         }else{
                                 Toast.makeText(getApplicationContext(),"Precio del dólar: " + msg, Toast.LENGTH_LONG).show();
@@ -235,12 +240,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }).start();
     }
 
+    //check if string could be converted to number
     public static boolean isNumeric(String strNum) {
         if (strNum == null) {
             return false;
         }
         try {
-            double d = Double.parseDouble(strNum);
+            Double.parseDouble(strNum);
 
         } catch (NumberFormatException nfe) {
             return false;

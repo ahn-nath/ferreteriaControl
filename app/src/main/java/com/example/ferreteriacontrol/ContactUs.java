@@ -21,10 +21,12 @@ EditText contactSubject, contactMessage;
     }
 
     public void sendEmail(View view) {
+        //get values of input text
         String subject = contactSubject.getText().toString();
         String message = contactMessage.getText().toString();
         String[] recipients = {"hvtoledo@gmail.com"};
 
+        //send email 
         Intent intent =  new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
         intent.putExtra(Intent.EXTRA_EMAIL, recipients);
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
