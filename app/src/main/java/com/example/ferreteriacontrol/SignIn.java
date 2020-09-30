@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -45,7 +46,7 @@ public class SignIn extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         //if there's a user logged in redirect
-        if(mAuth.getCurrentUser() != null){
+        if (mAuth.getCurrentUser() != null) {
             startActivity(new Intent(getApplicationContext(), waitingRoom.class));
             finish();
         }
@@ -93,7 +94,7 @@ public class SignIn extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                                     if (documentSnapshot.exists()) {
-                                        int role =  Integer.parseInt(Objects.requireNonNull(documentSnapshot.get("rol")).toString());
+                                        int role = Integer.parseInt(Objects.requireNonNull(documentSnapshot.get("rol")).toString());
                                         boolean isAdmin = (role == 1 || role == 2); //if the role correspond to admin, set to true
 
                                         //save role and boolean value to SharedPreferences.
@@ -104,13 +105,12 @@ public class SignIn extends AppCompatActivity {
                                         editor.putBoolean("isAdmin", isAdmin);
                                         editor.apply();
 
-                                    }    }
+                                    }
+                                }
                             });
-                   //go to Main activity
+                    //go to Main activity
                     startActivity(new Intent(getApplicationContext(), SignIn.class));
-                }
-
-                else {
+                } else {
                     Toast.makeText(SignIn.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                     loadingDialog.dismissDialog();
                 }

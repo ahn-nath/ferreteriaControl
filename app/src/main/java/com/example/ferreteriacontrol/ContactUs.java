@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 
 public class ContactUs extends AppCompatActivity {
-EditText contactSubject, contactMessage;
+    EditText contactSubject, contactMessage;
 
 
     @Override
@@ -26,8 +26,8 @@ EditText contactSubject, contactMessage;
         String message = contactMessage.getText().toString();
         String[] recipients = {"hvtoledo@gmail.com"};
 
-        //send email 
-        Intent intent =  new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
+        //send email
+        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
         intent.putExtra(Intent.EXTRA_EMAIL, recipients);
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.putExtra(Intent.EXTRA_TEXT, message);

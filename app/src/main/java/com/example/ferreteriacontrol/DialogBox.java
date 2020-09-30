@@ -14,10 +14,10 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import java.util.Locale;
 
 public class DialogBox extends AppCompatDialogFragment {
-    AlertDialog dialog;
-    Activity activity;
+    private AlertDialog dialog;
+    private Activity activity;
 
-    public DialogBox(Activity activity) {
+    DialogBox(Activity activity) {
         this.activity = activity;
     }
 
@@ -29,13 +29,11 @@ public class DialogBox extends AppCompatDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        String priceinDollars = "El precio no está disponible";
         Double price = 0.0, current_dollar = null;
         //get price in dollars
         if (getArguments() != null) {
             price = getArguments().getDouble("price_dollars");
             current_dollar = getArguments().getDouble("current_dollar");
-            priceinDollars = price.toString() + " BsS";
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Precio en Bolívares");
@@ -50,7 +48,7 @@ public class DialogBox extends AppCompatDialogFragment {
         return builder.create();
     }
 
-    void loginLoadDialog(){
+    void loginLoadDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         //set the view for the activity
@@ -62,7 +60,7 @@ public class DialogBox extends AppCompatDialogFragment {
         dialog.show();
     }
 
-    void dismissDialog(){
+    void dismissDialog() {
         dialog.dismiss();
     }
 }

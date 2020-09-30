@@ -26,7 +26,6 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.text.DecimalFormat;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -73,9 +72,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Top nav bar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.main_menu, menu);
-          return  true;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
 
     }
 
@@ -102,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return super.onOptionsItemSelected(item);
         }
     }
-
 
 
     //set TableView with product categories
@@ -192,8 +190,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final String current_price, msg;
-                final boolean isNumeric;
+                final String CURRENT_PRICE, MSG;
+                final boolean IS_NUMERIC;
                 Document document;
                 String send = null, message;
 
@@ -214,24 +212,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 //set values to final variables
-                current_price = send;
-                isNumeric = isNumeric(current_price); //validate that the value could be converted to number
-                msg = message; //message for each case [successful, failed]
+                CURRENT_PRICE = send;
+                IS_NUMERIC = isNumeric(CURRENT_PRICE); //validate that the value could be converted to number
+                MSG = message; //message for each case [successful, failed]
 
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         //if the value [string] is not null and could be converted to number
-                        if (current_price != null && (isNumeric)) {
+                        if (CURRENT_PRICE != null && (IS_NUMERIC)) {
                             //sharedPreferences
-                            Toast.makeText(getApplicationContext(), msg + current_price + isNumeric, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), MSG + CURRENT_PRICE + IS_NUMERIC, Toast.LENGTH_LONG).show();
                             SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString("dollarPrice", current_price);
+                            editor.putString("dollarPrice", CURRENT_PRICE);
                             editor.apply();
-                        }else{
-                                Toast.makeText(getApplicationContext(),"Precio del dólar: " + msg, Toast.LENGTH_LONG).show();
-                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Precio del dólar: " + MSG, Toast.LENGTH_LONG).show();
+                        }
 
                     }
                 });
@@ -255,6 +253,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    }
+}
 
 

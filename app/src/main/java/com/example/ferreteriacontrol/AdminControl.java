@@ -52,7 +52,7 @@ public class AdminControl extends AppCompatActivity {
     private DocumentReference docRef;
     private ProductAdapter adapter;
     private Query queryReference;
-    int hello;
+    int userRole;
     private boolean authorizeUser;
     EditText searchText;
     FloatingActionButton buttonAddProduct;
@@ -73,10 +73,10 @@ public class AdminControl extends AppCompatActivity {
         buttonImport = findViewById(R.id.button_import);
         buttonExport = findViewById(R.id.button_export);
 
-        //get user's role and position
+        //get user's role and if authorized
         SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
         authorizeUser = sharedPreferences.getBoolean("isAdmin", false);
-        hello = sharedPreferences.getInt("role", 0);
+        userRole = sharedPreferences.getInt("role", 0);
 
         if (authorizeUser) {
             //Make add product button visible for this activity
@@ -91,17 +91,18 @@ public class AdminControl extends AppCompatActivity {
             });
         }
 
-        Toast.makeText(getApplicationContext(), "data" + hello + authorizeUser, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "data" + userRole + authorizeUser, Toast.LENGTH_LONG).show();
 
 
-        //get extra intent to determine product's filter
+        //get extra intent from Main Activity to determine what products to show
         Intent intent = getIntent();
         int rubro = intent.getIntExtra("rubro", -1);
         if (rubro == -1) {
+            //if the category of the prududct was not specified, show all
             queryReference = productRef;
         } else {
+            //if the categiry was specified, get it
             queryReference = productRef.whereEqualTo("group", rubro);
-            ;
         }
 
         setUpProductsView(queryReference);
@@ -126,9 +127,9 @@ public class AdminControl extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 String st;
                 if (s.toString() != null) {
-                    if(s.toString().length() > 0) {
+                    if (s.toString().length() > 0) {
                         st = s.toString().substring(0, 1).toUpperCase() + s.toString().substring(1);
-                    }else{
+                    } else {
                         st = s.toString();
                     }
 
@@ -146,7 +147,7 @@ public class AdminControl extends AppCompatActivity {
                     adapter.updateOptions(newOptions);
 
                 } else {
-                    //if string is null/empty create simple query
+                    //if string is null/empty create simple query to show all products
                     FirestoreRecyclerOptions<Product> emptyOptions = new FirestoreRecyclerOptions.Builder<Product>()
                             .setQuery(productRef, Product.class)
                             .build();
@@ -171,9 +172,11 @@ public class AdminControl extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();//change data again
+        adapter.notifyDataSetChanged();
+        //change data again
 
-        //Remove item
+
+        //Remove item/product on swiped
         if (authorizeUser) {
             new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
                     ItemTouchHelper.RIGHT) {
@@ -205,7 +208,6 @@ public class AdminControl extends AppCompatActivity {
         adapter.setOnItemClickListener(new ProductAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(DocumentSnapshot documentSnapshot, int position, int caseView) {
-                Product product = documentSnapshot.toObject(Product.class);
                 String id = documentSnapshot.getId();
                 String path = documentSnapshot.getReference().getPath();
 
@@ -223,29 +225,29 @@ public class AdminControl extends AppCompatActivity {
                 //Get price in BsS if "BsS" tag is touched
                 if (caseView == 2) {
                     //Show price in dollars
-                    docRef = mStore.document(path); //get document data
+                    docRef = mStore.document(path); //get document data/price in dollars
                     docRef.get()
                             .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                 @Override
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                                     if (documentSnapshot.exists()) {
-                                        final Double productPrice = documentSnapshot.getDouble("price");
+                                        final Double calculusPrice, currentPrice;
+
                                         Toast.makeText(AdminControl.this,
                                                 "Calculando precio en doláres...", Toast.LENGTH_LONG).show();
 
-
-                                        final Double calculus_price, current_price;
+                                        final Double productPrice = documentSnapshot.getDouble("price");
                                         SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
                                         String price = sharedPreferences.getString("dollarPrice", "");
 
                                         //calculate price of product in sovereign bolivars
-                                        current_price = Double.parseDouble(price);
-                                        calculus_price = productPrice * current_price;
+                                        currentPrice = Double.parseDouble(price);
+                                        calculusPrice = productPrice * currentPrice; //currency conversion (price in bolivars)
 
                                         //send data to Dialog Box
                                         Bundle bundle = new Bundle();
-                                        bundle.putDouble("price_dollars", calculus_price);
-                                        bundle.putDouble("current_dollar", current_price);
+                                        bundle.putDouble("price_dollars", calculusPrice);
+                                        bundle.putDouble("current_dollar", currentPrice);
                                         DialogBox dialogMessage = new DialogBox();
                                         dialogMessage.setArguments(bundle);
                                         dialogMessage.show(getSupportFragmentManager(), "Dialog box");
@@ -265,6 +267,7 @@ public class AdminControl extends AppCompatActivity {
     //Import data to database
     //read data from file and update database
     public void readFile(View view) {
+        //select file to read data from
         Toast.makeText(getApplicationContext(), "Importar base de datos", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -275,6 +278,7 @@ public class AdminControl extends AppCompatActivity {
     //Export data to database
     //read data from file and update database
     public void saveFile(View view) {
+        //select file to save data to
         Toast.makeText(getApplicationContext(), "Exportar base de datos", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -288,13 +292,14 @@ public class AdminControl extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, resultData);
         Uri currentUri = null;
         if (resultCode == Activity.RESULT_OK) {
+            //Import data: get data from file
             if (requestCode == OPEN_REQUEST_CODE) {
                 if (resultData != null) {
                     currentUri = resultData.getData();
-                    getDataFromExcel(currentUri); //if successful
+                    getDataFromExcel(currentUri);
                 }
+            //Export data: save data to file
             } else if (requestCode == SAVE_REQUEST_CODE) {
-
                 if (resultData != null) {
                     currentUri =
                             resultData.getData();
@@ -304,40 +309,42 @@ public class AdminControl extends AppCompatActivity {
         }
     }
 
+    //Export database: save data to file
     private void writeFileContent(Uri currentUri) {
         try {
-            final ParcelFileDescriptor pfd =
+            final ParcelFileDescriptor PDF =
                     this.getContentResolver().
                             openFileDescriptor(currentUri, "w");
 
             final FileOutputStream fileOutputStream =
                     new FileOutputStream(
-                            pfd.getFileDescriptor());
+                            PDF.getFileDescriptor());
 
             productRef
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                             if (task.isSuccessful()) {
+                            //get list of documents in collection
+                            if (task.isSuccessful()) {
                                 List<DocumentSnapshot> myListOfDocuments = task.getResult().getDocuments();
-                                String textContent = "Id;Nombre;Marca;Cantidad;Unidad;Precio;Grupo" + "\n";
+                                String textContent = "Id;Nombre;Marca;Cantidad;Unidad;Precio;Grupo" + "\n"; //header of the file
 
                                 for (DocumentSnapshot document : myListOfDocuments) {
                                     Log.d("Firebase doc", document.getId() + " => " + document.toObject(Product.class).toString());
 
-                                    //save it to document
-                                    textContent+=(document.getId()+ "; " + document.toObject(Product.class).toString() + "\n");
+                                    //get the data of each document and add it to textContent [String]
+                                    textContent += (document.getId() + "; " + document.toObject(Product.class).toString() + "\n");
                                     //arrayDocs.add(document.toObject(Product.class).toString() + "\n");
                                 }
                                 Toast.makeText(getApplicationContext(), "Base de datos exportada de forma exitosa", Toast.LENGTH_SHORT).show();
                                 Log.d("New string", textContent);
                                 //save it to doc
                                 try {
+                                    //write file with the content of textContent
                                     fileOutputStream.write(textContent.getBytes());
                                     fileOutputStream.close();
-                                    pfd.close();
+                                    PDF.close();
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -353,40 +360,46 @@ public class AdminControl extends AppCompatActivity {
     }
 
 
+    //Import database: read content of file
     public void getDataFromExcel(Uri currentUri) {
         String line = "";
         int totalDoc = 0;
-        int f = 0;
-        int s = 0;
+        int f = 0; //failed cases
+        int s = 0; //successful cases
         boolean finalResult = false;
+
         //read each line of document one by one
         try {
             InputStream inputStream = getContentResolver().openInputStream(currentUri);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
 
-
             //Skip headers of the file
             reader.readLine();
-            int c;
+            int c; //count each line
             while ((line = reader.readLine()) != null) {
                 totalDoc++;
                 Log.d("Activity", "Line: " + line); //to debug code
-                String[] tokens = line.split(";|,"); //Split string by semicolon/comma
+                //Split string by semicolon/comma
+                String[] tokens = line.split(";|,");
                 c = 0;
+
                 //Read and validate the data
                 Product product = new Product();
                 boolean result = true; //used to determine if an object should be added to ArrayList
                 Log.d("Activity", "alength: " + tokens.length); //to debug code
+
                 if (tokens.length == 6) {
                     while (c < 6) {
                         boolean wasSuccessful = product.readContentExcel(tokens[c], c); //determine if the value was set to attribut
                         Log.d("Success case", "counter:" + c + " result:" + wasSuccessful);
+
                         if (!wasSuccessful) { //if one of the values were not correct, end the process and return false
                             result = false;
                             break;
                         }
                         c++;
                     }
+
                     Log.d("Success case", "counter:" + c + " result final product:" + result);
                     if (result) { //if all the values were correct, add new object
                         s++; //successful document

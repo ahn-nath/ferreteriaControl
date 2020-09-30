@@ -37,7 +37,7 @@ public class SignUp extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up_02);
         mAuth = FirebaseAuth.getInstance();
         mStore = FirebaseFirestore.getInstance();
-        emailUser =  findViewById(R.id.emailUser);
+        emailUser = findViewById(R.id.emailUser);
         passwordUser = findViewById(R.id.passwordUser);
         loadingDialog = new DialogBox(SignUp.this);
     }
@@ -47,7 +47,7 @@ public class SignUp extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         //if there's a user logged in redirect
-        if(mAuth.getCurrentUser() != null){
+        if (mAuth.getCurrentUser() != null) {
             startActivity(new Intent(getApplicationContext(), waitingRoom.class));
             finish();
         }
@@ -88,16 +88,16 @@ public class SignUp extends AppCompatActivity {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Toast.makeText(SignUp.this, "Se ha enviado un email a su correo para verificar la cuenta", Toast.LENGTH_SHORT).show();
-                            }
+                        }
 
-                        }).addOnFailureListener(new OnFailureListener() {
+                    }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(SignUp.this, "No se ha podido enviar el correo de verificación", Toast.LENGTH_SHORT).show();
                         }
                     });
 
-                   //Create user and add custom fields to database
+                    //Create user and add custom fields to database
                     //Get reference to the collection in database and add values
                     userId = mAuth.getCurrentUser().getUid();
                     DocumentReference documentReference = mStore.collection("usuarios").document(userId);
@@ -108,14 +108,14 @@ public class SignUp extends AppCompatActivity {
 
                     documentReference.set(user)
 
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(SignUp.this, "Datos agregados de forma exitosa", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(), waitingRoom.class));
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Toast.makeText(SignUp.this, "Datos agregados de forma exitosa", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(getApplicationContext(), waitingRoom.class));
 
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(SignUp.this, "Hubo un inconveniente con la base de datos" + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();

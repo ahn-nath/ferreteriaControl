@@ -5,14 +5,14 @@ import androidx.annotation.NonNull;
 public class Product {
     private String image;
     private String name;
-    private  String brand;
-    private  String unit;
+    private String brand;
+    private String unit;
     private double price;
     private int amount;
     private int group;
 
 
-    public Product(String name, String brand, double price, int amount, String unit, String image, int group){
+    Product(String name, String brand, double price, int amount, String unit, String image, int group) {
         this.image = image;
         this.name = name;
         this.brand = brand;
@@ -23,7 +23,7 @@ public class Product {
     }
 
 
-    public Product(String name, String brand, double price, int amount, String unit, int group){
+    public Product(String name, String brand, double price, int amount, String unit, int group) {
         this.name = name;
         this.brand = brand;
         this.price = price;
@@ -32,7 +32,7 @@ public class Product {
         this.group = group;
     }
 
-    public Product(){
+    Product() {
         //empty constructor
     }
 
@@ -69,23 +69,23 @@ public class Product {
     }
 
     public boolean setName(String name) {
-        if(name.trim() != null && name.trim().length() > 3) {
-            this.name = name.trim().substring(0,1).toUpperCase() + name.trim().substring(1);
+        if (name.trim() != null && name.trim().length() > 3) {
+            this.name = name.trim().substring(0, 1).toUpperCase() + name.trim().substring(1);
             return true;
         }
         return false;
     }
 
     public boolean setBrand(String brand) {
-        if(brand.trim() != null && brand.trim().length() > 3) {
-            this.brand = brand.trim().substring(0,1).toUpperCase() + brand.trim().substring(1);
+        if (brand.trim() != null && brand.trim().length() > 3) {
+            this.brand = brand.trim().substring(0, 1).toUpperCase() + brand.trim().substring(1);
             return true;
         }
         return false;
     }
 
     public boolean setPrice(double price) {
-        if(price > 0.0) {
+        if (price > 0.0) {
             this.price = price;
             return true;
         }
@@ -93,7 +93,7 @@ public class Product {
     }
 
     public boolean setAmount(int amount) {
-        if(amount > 0) {
+        if (amount > 0) {
             this.amount = amount;
             return true;
         }
@@ -101,8 +101,8 @@ public class Product {
     }
 
     public boolean setUnit(String unit) {
-      unit = unit.toLowerCase();
-        if(unit != null && (unit.trim().equals("u") || unit.trim().equals("kg") || unit.trim().equals("g"))) {
+        unit = unit.toLowerCase();
+        if (unit != null && (unit.trim().equals("u") || unit.trim().equals("kg") || unit.trim().equals("g"))) {
             this.unit = unit;
             return true;
         }
@@ -110,55 +110,53 @@ public class Product {
     }
 
     public boolean setGroup(int group) {
-        if(group > 0 && group <= 11) {
+        if (group > 0 && group <= 11) {
             this.group = group;
             return true;
         }
         return false;
-        }
-
-    public boolean readContentExcel(String token, int c){
-    switch (c){
-        case 0:
-            return setName(token);
-
-        case 1:
-            return setBrand(token);
-
-        case 2:
-            if(isNumeric(token, 1)) {
-                return setAmount(Integer.parseInt(token));
-            }
-            return false;
-
-        case 3:
-            return setUnit(token);
-
-        case 4:
-            if(isNumeric(token, 2)) {
-             return setPrice(Double.parseDouble(token));
-            }
-            return false;
-
-        case 5:
-            if(isNumeric(token, 1)) {
-                return setGroup(Integer.parseInt(token));
-            }
-            return false;
     }
 
-    return false;
+    public boolean readContentExcel(String token, int c) {
+        switch (c) {
+            case 0:
+                return setName(token);
+
+            case 1:
+                return setBrand(token);
+
+            case 2:
+                if (isNumeric(token, 1)) {
+                    return setAmount(Integer.parseInt(token));
+                }
+                return false;
+
+            case 3:
+                return setUnit(token);
+
+            case 4:
+                if (isNumeric(token, 2)) {
+                    return setPrice(Double.parseDouble(token));
+                }
+                return false;
+
+            case 5:
+                if (isNumeric(token, 1)) {
+                    return setGroup(Integer.parseInt(token));
+                }
+                return false;
+        }
+
+        return false;
     }
 
     private static boolean isNumeric(String strNum, int c) {
-        if (strNum.trim() == null) {
-            return false;
-        }
+        strNum.trim();
         try {
-            if(c == 1) {
+            if (c == 1) {
                 int i = Integer.parseInt(strNum);
             }
-            if(c == 2){
+            if (c == 2) {
                 double d = Double.parseDouble(strNum);
             }
         } catch (NumberFormatException nfe) {

@@ -93,6 +93,7 @@ public class SingleProductAdmin extends AppCompatActivity {
                     }
                 });
     }
+
     //Set save icon in top nav-bar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -115,11 +116,11 @@ public class SingleProductAdmin extends AppCompatActivity {
 
     private void saveProduct() {
 
-        boolean  unitValue =  ((measurementsGroup.getCheckedRadioButtonId() == -1) ? false : true);
+        boolean unitValue = ((measurementsGroup.getCheckedRadioButtonId() == -1) ? false : true);
 
         if (TextUtils.isEmpty(addName.getText().toString())) {
             addName.setError("El nombre de producto es obligatorio");
-           return;
+            return;
         }
 
         if (TextUtils.isEmpty(addBrand.getText().toString())) {
@@ -138,7 +139,7 @@ public class SingleProductAdmin extends AppCompatActivity {
         }
 
         if (!unitValue) {
-            Toast.makeText(getApplicationContext(),"La unidad es obligatoria", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "La unidad es obligatoria", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -160,8 +161,7 @@ public class SingleProductAdmin extends AppCompatActivity {
                     "brand", brand, "price", price, "amount", amount, "unit", unit, "group", group);
             Toast.makeText(this, "Producto Actualizado", Toast.LENGTH_SHORT).show();
             finish();
-        }
-        else {
+        } else {
             //Add new product
             CollectionReference notebookRef = mStore.collection("Productos");
             notebookRef.add(new Product(name, brand, price, amount, unit, image, group));

@@ -30,22 +30,22 @@ public class waitingRoom extends AppCompatActivity {
         mStore = FirebaseFirestore.getInstance();
         accessText = findViewById(R.id.accessText);
 
-        //check if user has access
+        //check if user has access. Make this a method and call it onStart()
         SharedPreferences mainInfo = getApplicationContext().getSharedPreferences("MainInfo", MODE_PRIVATE);
         int hasAccess = mainInfo.getInt("hasAccess", 0);
 
         //if the status is equal to 1 [approved] send to Main Activity
-        if(hasAccess == 1){
+        if (hasAccess == 1) {
             Log.d("AShared", "the user has access");
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
         }
         //if the status is equal to 2 [declined] set message
-        else if(hasAccess == 2){
+        else if (hasAccess == 2) {
             Log.d("AShared", "the user doesn't have access'");
             accessText.setText("Su solicitud de acceso ha sido denegada por el administrador");
-        }else{
+        } else {
             Log.d("AShared", "null");
-        //if there's no status, verify status of the user with database's value
+            //if there's no status, verify status of the user with database's value
             verifyUser();
         }
     }
@@ -55,7 +55,7 @@ public class waitingRoom extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         //if there's a user logged in redirect
-        if(mAuth.getCurrentUser() == null){
+        if (mAuth.getCurrentUser() == null) {
             Log.d("Error", "no está creado");
             startActivity(new Intent(getApplicationContext(), SignIn.class));
             finish();
@@ -63,8 +63,7 @@ public class waitingRoom extends AppCompatActivity {
     }
 
 
-
-    public void verifyUser(){
+    public void verifyUser() {
         Toast.makeText(getApplicationContext(), "Verificando nuevas actualizaciones...", Toast.LENGTH_SHORT).show();
         //Store user's role
         userId = mAuth.getCurrentUser().getUid();
@@ -74,20 +73,20 @@ public class waitingRoom extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if (documentSnapshot.exists()) {
-                            int access =  Integer.parseInt(documentSnapshot.get("access").toString());
-                            if(access == 1){
-                             //approved
-                               Log.d("AFirebase", "approved");
-                               //save to share preferences for further access to this activity
-                               SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
-                               SharedPreferences.Editor editor = sharedPreferences.edit();
-                               editor.putInt("hasAccess", 1);
-                               editor.apply();
-                               //send to new activity
-                               startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                           }
-                            if(access == 2){
-                             //declined
+                            int access = Integer.parseInt(documentSnapshot.get("access").toString());
+                            if (access == 1) {
+                                //approved
+                                Log.d("AFirebase", "approved");
+                                //save to share preferences for further access to this activity
+                                SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putInt("hasAccess", 1);
+                                editor.apply();
+                                //send to new activity
+                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                            }
+                            if (access == 2) {
+                                //declined
                                 Log.d("AFirebase", "declined");
                                 SharedPreferences sharedPreferences = getSharedPreferences("MainInfo", MODE_PRIVATE);
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -98,7 +97,8 @@ public class waitingRoom extends AppCompatActivity {
                             }
                             Toast.makeText(getApplicationContext(), "Último estatus recibido", Toast.LENGTH_SHORT).show();
 
-                        }    }
+                        }
+                    }
                 });
     }
 }

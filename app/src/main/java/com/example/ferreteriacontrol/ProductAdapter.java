@@ -35,11 +35,11 @@ public class ProductAdapter extends FirestoreRecyclerAdapter<Product, ProductAda
         if (includeImage) {
             Picasso.get()
                     .load("https://drive.google.com/uc?id=" + (model.getImage()))//add real url later
-                    .error(R.drawable.no_image).resize(150,150).centerCrop()
+                    .error(R.drawable.no_image).resize(150, 150).centerCrop()
                     .resize(200, 200)
                     .centerCrop()
                     .into(holder.productImage);
-                    //add default image
+            //add default image
 
             holder.productImage.setVisibility(View.VISIBLE);
         }
@@ -58,12 +58,12 @@ public class ProductAdapter extends FirestoreRecyclerAdapter<Product, ProductAda
     }
 
     //filterView attempt 1
-    public void filterView(Query query){
+    public void filterView(Query query) {
         FirestoreRecyclerOptions<Product> options = new FirestoreRecyclerOptions.Builder<Product>()
                 .setQuery(query, Product.class)
                 .build();
 
-       notifyDataSetChanged();//change data again
+        notifyDataSetChanged();//change data again
     }
 
     class ProductHolder extends RecyclerView.ViewHolder {
